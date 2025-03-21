@@ -1,9 +1,11 @@
+import RegisterPage from "@/pages/RegisterPage";
+
 function App() {
   return (
     <>
-      Hello world
+      <RegisterPage />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
