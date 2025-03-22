@@ -1,0 +1,51 @@
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+const LoginPage = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = async () => {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    console.log(response);
+
+    if (response.ok) {
+      const { token } = await response.json();
+      localStorage.setItem("token", token);
+    }
+  };
+
+  return (
+    <div className="flex justify-center items-center min-h-screen bg-muted px-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Sign in</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <Input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button onClick={handleSubmit}>Login</Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default LoginPage;
