@@ -5,24 +5,37 @@ import {
   generateRefreshToken,
   verifyRefreshToken,
 } from "../utils/token";
+import prisma from "../prisma";
 
 const router = express.Router();
 
-const users: { email: string; password: string }[] = [];
-
 router.post("/register", async (req, res) => {
   const { email, password } = req.body;
-  if (users[email]) {
+  const user = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+  });
+
+  if (user) {
     res.status(400).send("User already exists");
     return;
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  users.push({ email, password: hashedPassword });
+  await prisma.user.create({
+    data: {
+      email,
+      password: hashedPassword,
+    },
+  });
+
+  prisma.user.findMany().then((users) => {
+    console.log(users);
+  });
 
   const accessToken = generateAccessToken({ email });
   const refreshToken = generateRefreshToken({ email });
-
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -30,13 +43,16 @@ router.post("/register", async (req, res) => {
     path: "/api/auth/refresh",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
-
   res.json({ accessToken, refreshToken });
 });
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  const user = users[email];
+  const user = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+  });
 
   if (!user) {
     res.status(400).send("User not found");
@@ -50,7 +66,6 @@ router.post("/login", async (req, res) => {
 
   const accessToken = generateAccessToken({ email });
   const refreshToken = generateRefreshToken({ email });
-
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -58,12 +73,12 @@ router.post("/login", async (req, res) => {
     path: "/api/auth/refresh",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
-
   res.json({ accessToken, refreshToken });
 });
 
 router.post("/refresh", (req, res) => {
   const refreshToken = req.cookies.refreshToken;
+
   if (!refreshToken) {
     res.status(401).send("Refresh token not found");
     return;

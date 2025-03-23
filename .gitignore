@@ -23,4 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
+# Prisma and SQLite
+dev.db
+dev.db-journal
+*.sqlite
+*.sqlite3
+
 .env
