@@ -1,14 +1,12 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-
-dotenv.config();
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} from "../utils/token";
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET)
-  throw new Error("JWT_SECRET is not defined in the environment variables");
 
 const users: { email: string; password: string }[] = [];
 
@@ -22,8 +20,18 @@ router.post("/register", async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   users.push({ email, password: hashedPassword });
 
-  const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "1h" });
-  res.json({ token });
+  const accessToken = generateAccessToken({ email });
+  const refreshToken = generateRefreshToken({ email });
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/api/auth/refresh",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  res.json({ accessToken, refreshToken });
 });
 
 router.post("/login", async (req, res) => {
@@ -40,8 +48,35 @@ router.post("/login", async (req, res) => {
     return;
   }
 
-  const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "1h" });
-  res.json({ token });
+  const accessToken = generateAccessToken({ email });
+  const refreshToken = generateRefreshToken({ email });
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/api/auth/refresh",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  res.json({ accessToken, refreshToken });
+});
+
+router.post("/refresh", (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) {
+    res.status(401).send("Refresh token not found");
+    return;
+  }
+
+  try {
+    const payload = verifyRefreshToken(refreshToken);
+    const email = (payload as { email: string }).email;
+    const newAccessToken = generateAccessToken({ email });
+    res.json({ accessToken: newAccessToken });
+  } catch (err) {
+    res.status(403).send("Invalid refresh token");
+  }
 });
 
 export default router;
