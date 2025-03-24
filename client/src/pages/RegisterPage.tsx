@@ -15,8 +15,8 @@ const RegisterPage = () => {
     });
 
     if (response.ok) {
-      const { token } = await response.json();
-      localStorage.setItem("token", token);
+      const { accessToken } = await response.json();
+      localStorage.setItem("token", accessToken);
     }
   };
 
