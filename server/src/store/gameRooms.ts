@@ -1,24 +1,40 @@
+import { Player } from "./players";
+
 type GameRoom = {
-  code: string;
+  roomCode: string;
   createdAt: number;
+  maxPlayers: number;
+  players: Player[];
 };
 
 const gameRooms: Map<string, GameRoom> = new Map();
 
-export function createGameRoom(): GameRoom {
-  const code = generateUniqueRoomCode();
-  const createdAt = Date.now();
-  const gameRoom = { code, createdAt };
-  gameRooms.set(code, gameRoom);
-  return gameRoom;
+export function createGameRoom(maxPlayers: number): GameRoom {
+  const roomCode = generateUniqueRoomCode();
+  const room = { roomCode, createdAt: Date.now(), maxPlayers, players: [] };
+  gameRooms.set(roomCode, room);
+  return room;
 }
 
-export function getGameRoom(code: string): GameRoom | undefined {
-  return gameRooms.get(code);
+export function getGameRoom(roomCode: string): GameRoom | undefined {
+  const room = gameRooms.get(roomCode);
+  // Remove player IDs before sending the room data to the client
+  room?.players.forEach((player) => {
+    delete player.id;
+  });
+  return room;
 }
 
-export function deleteGameRoom(code: string): void {
-  gameRooms.delete(code);
+export function deleteGameRoom(roomCode: string): void {
+  gameRooms.delete(roomCode);
+}
+
+export function joinGameRoom(roomCode: string, player: Player): boolean {
+  const room = gameRooms.get(roomCode);
+  if (!room || room.players.length >= room.maxPlayers) return false;
+
+  room.players.push(player);
+  return true;
 }
 
 function generateUniqueRoomCode(): string {
@@ -30,7 +46,7 @@ function generateUniqueRoomCode(): string {
       .map(() =>
         characters.charAt(Math.floor(Math.random() * characters.length))
       )
-      .toString();
+      .join("");
     if (!gameRooms.has(code)) {
       return code;
     }

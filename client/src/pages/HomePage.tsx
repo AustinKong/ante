@@ -7,8 +7,11 @@ const HomePage = () => {
   return (
     <div>
       <Button onClick={() => navigate("/login")}>Login</Button>
-      <Button onClick={() => navigate("/register")}>Login</Button>
-      <Button onClick={() => navigate("/joinGame")}>Join Game</Button>
+      <Button onClick={() => navigate("/register")}>Register</Button>
+      {localStorage.getItem("token") && (
+        <Button onClick={() => navigate("/createRoom")}>Create Room</Button>
+      )}
+      <Button onClick={() => navigate("/joinRoom")}>Join Game</Button>
     </div>
   );
 };

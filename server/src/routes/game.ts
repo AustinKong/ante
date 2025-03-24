@@ -4,15 +4,44 @@ import {
   createGameRoom,
   getGameRoom,
   deleteGameRoom,
+  joinGameRoom,
 } from "../store/gameRooms";
+import { createHost, createPlayer } from "../store/players";
 
 const gameRouter = express.Router();
 
 gameRouter.post("/create", authenticate, (req, res) => {
-  const room = createGameRoom();
-  res.status(201).json({ roomCode: room.code });
+  const { maxPlayers } = req.body;
+
+  const host = createHost();
+  const room = createGameRoom(maxPlayers);
+  joinGameRoom(room.roomCode, host);
+
+  res.status(201).json({
+    room: room,
+    player: host,
+  });
 });
 
-gameRouter.post("/join", (req, res) => {});
+gameRouter.post("/join", (req, res) => {
+  const { roomCode } = req.body;
+  const room = getGameRoom(roomCode);
+  const player = createPlayer();
+
+  if (!room) {
+    res.status(404).send("Room not found");
+    return;
+  }
+
+  if (!joinGameRoom(roomCode, player)) {
+    res.status(400).send("Room is full");
+    return;
+  }
+
+  res.status(200).json({
+    room,
+    player,
+  });
+});
 
 export default gameRouter;

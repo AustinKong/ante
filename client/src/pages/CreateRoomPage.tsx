@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import {
   Form,
   FormControl,
@@ -21,6 +22,8 @@ const formSchema = z.object({
 });
 
 const CreateRoomPage = () => {
+  const navigate = useNavigate();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -29,7 +32,7 @@ const CreateRoomPage = () => {
   });
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
-    await fetch("/api/game/create", {
+    const response = await fetch("/api/game/create", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -37,6 +40,12 @@ const CreateRoomPage = () => {
       },
       body: JSON.stringify(data),
     });
+
+    if (response.ok) {
+      const { room, player } = await response.json();
+      localStorage.setItem("player", JSON.stringify(player));
+      navigate(`/game/${room.roomCode}`);
+    }
   };
 
   return (
