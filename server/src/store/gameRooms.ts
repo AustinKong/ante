@@ -1,17 +1,29 @@
-import { Player } from "./players";
-
-type GameRoom = {
-  roomCode: string;
-  createdAt: number;
-  maxPlayers: number;
-  players: Player[];
-};
+import { Player } from "../types/player.types";
+import { GameRoom, GameType } from "../types/room.types";
 
 const gameRooms: Map<string, GameRoom> = new Map();
 
-export function createGameRoom(maxPlayers: number): GameRoom {
+export function createGameRoom(
+  maxPlayers: number,
+  gameType: GameType
+): GameRoom {
   const roomCode = generateUniqueRoomCode();
-  const room = { roomCode, createdAt: Date.now(), maxPlayers, players: [] };
+  const room = {
+    roomCode,
+    createdAt: Date.now(),
+    maxPlayers,
+    gameType,
+    players: [],
+    currentTurnIndex: 0,
+  };
+
+  switch (gameType) {
+    case "poker":
+      break;
+    case "blackjack":
+      break;
+  }
+
   gameRooms.set(roomCode, room);
   return room;
 }

@@ -1,10 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-
-export type Player = {
-  id?: string;
-  username: string;
-  isHost: boolean;
-};
+import { Player } from "../types/player.types";
 
 export function createHost(): Player {
   const host = createPlayer();

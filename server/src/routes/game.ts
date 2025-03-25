@@ -14,7 +14,8 @@ gameRouter.post("/create", authenticate, (req, res) => {
   const { maxPlayers } = req.body;
 
   const host = createHost();
-  const room = createGameRoom(maxPlayers);
+  // FIXME: Hard coded for now
+  const room = createGameRoom(maxPlayers, "poker");
   joinGameRoom(room.roomCode, host);
 
   res.status(201).json({
