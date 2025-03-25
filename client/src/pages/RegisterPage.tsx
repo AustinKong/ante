@@ -14,11 +14,9 @@ const RegisterPage = () => {
       body: JSON.stringify({ email, password }),
     });
 
-    console.log(response);
-
     if (response.ok) {
-      const { token } = await response.json();
-      localStorage.setItem("token", token);
+      const { accessToken } = await response.json();
+      localStorage.setItem("token", accessToken);
     }
   };
 

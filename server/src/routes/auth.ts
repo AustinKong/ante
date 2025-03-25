@@ -30,10 +30,6 @@ router.post("/register", async (req, res) => {
     },
   });
 
-  prisma.user.findMany().then((users) => {
-    console.log(users);
-  });
-
   const accessToken = generateAccessToken({ email });
   const refreshToken = generateRefreshToken({ email });
   res.cookie("refreshToken", refreshToken, {
@@ -43,7 +39,7 @@ router.post("/register", async (req, res) => {
     path: "/api/auth/refresh",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
-  res.json({ accessToken, refreshToken });
+  res.json({ accessToken });
 });
 
 router.post("/login", async (req, res) => {
@@ -73,7 +69,7 @@ router.post("/login", async (req, res) => {
     path: "/api/auth/refresh",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
-  res.json({ accessToken, refreshToken });
+  res.json({ accessToken });
 });
 
 router.post("/refresh", (req, res) => {
