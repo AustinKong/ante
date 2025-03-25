@@ -1,17 +1,16 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import { createServer } from "http";
-import { Server } from "socket.io";
 import { createSocket } from "./socket";
 
 import cors from "cors";
-import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 
 import authRouter from "./routes/auth";
 import logger from "./middleware/logger";
 import gameRouter from "./routes/game";
-
-dotenv.config();
 
 const app = express(); // Express app
 const httpServer = createServer(app); // Http server wrapper
