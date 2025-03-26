@@ -7,9 +7,9 @@ import { createSocket } from "./socket";
 
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import logger from "./middleware/logger";
 
 import authRouter from "./routes/auth";
-import logger from "./middleware/logger";
 import gameRouter from "./routes/game";
 
 const app = express(); // Express app

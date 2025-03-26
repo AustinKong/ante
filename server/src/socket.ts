@@ -1,6 +1,8 @@
 import { Server } from "socket.io";
 import { Server as HttpServer } from "http";
-import { verifyRoomToken } from "./utils/token";
+import socketAuth from "./middleware/socketAuth";
+
+import { getRoom } from "./rooms/rooms";
 
 export function createSocket(httpServer: HttpServer) {
   const io = new Server(httpServer, {
@@ -10,23 +12,23 @@ export function createSocket(httpServer: HttpServer) {
     },
   });
 
+  io.use(socketAuth);
+
   function listen() {
     io.on("connection", (socket) => {
-      socket.on("authJoin", (token: string) => {
-        try {
-          const { roomCode, playerId } = verifyRoomToken(token) as {
-            roomCode: string;
-            playerId: string;
-          };
-          socket.join(roomCode);
-        } catch (err) {
-          socket.disconnect(true);
-        }
-      });
+      const { roomCode, playerId } = socket.data;
 
-      socket.on("joinRoom", (roomCode) => {
+      try {
+        const room = getRoom(roomCode);
+        if (!room) return socket.disconnect(true);
+
+        room.join(playerId);
         socket.join(roomCode);
-      });
+      } catch (err) {
+        return socket.disconnect(true);
+      }
+
+      console.log("Player successfully connected to room:", roomCode);
 
       socket.on("playerAction", ({ roomCode, action }) => {
         io.to(roomCode).emit("gameUpdate", action);

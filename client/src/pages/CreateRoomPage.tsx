@@ -42,9 +42,9 @@ const CreateRoomPage = () => {
     });
 
     if (response.ok) {
-      const { room, player } = await response.json();
-      localStorage.setItem("player", JSON.stringify(player));
-      navigate(`/game/${room.roomCode}`);
+      const { roomCode, roomToken } = await response.json();
+      localStorage.setItem("roomToken", roomToken);
+      navigate(`/game/${roomCode}`);
     }
   };
 
