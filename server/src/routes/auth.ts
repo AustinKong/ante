@@ -81,8 +81,7 @@ router.post("/refresh", (req, res) => {
   }
 
   try {
-    const payload = verifyRefreshToken(refreshToken);
-    const email = (payload as { email: string }).email;
+    const { email } = verifyRefreshToken(refreshToken) as { email: string };
     const newAccessToken = generateAccessToken({ email });
     res.json({ accessToken: newAccessToken });
   } catch (err) {

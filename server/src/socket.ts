@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import { Server as HttpServer } from "http";
+import { verifyRoomToken } from "./utils/token";
 
 export function createSocket(httpServer: HttpServer) {
   const io = new Server(httpServer, {
@@ -11,7 +12,17 @@ export function createSocket(httpServer: HttpServer) {
 
   function listen() {
     io.on("connection", (socket) => {
-      console.log("Socket connected:", socket.id);
+      socket.on("authJoin", (token: string) => {
+        try {
+          const { roomCode, playerId } = verifyRoomToken(token) as {
+            roomCode: string;
+            playerId: string;
+          };
+          socket.join(roomCode);
+        } catch (err) {
+          socket.disconnect(true);
+        }
+      });
 
       socket.on("joinRoom", (roomCode) => {
         socket.join(roomCode);

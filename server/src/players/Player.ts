@@ -1,15 +1,23 @@
 import { v4 as uuidv4 } from "uuid";
-import { Player } from "../types/player.types";
 
-export function createHost(): Player {
-  const host = createPlayer();
-  return { ...host, isHost: true };
-}
+export class Player {
+  id: string;
+  username: string;
+  isHost: boolean;
 
-export function createPlayer(): Player {
-  const id = uuidv4();
-  const username = generateUsername();
-  return { id, username, isHost: false };
+  constructor(isHost = false, username?: string) {
+    this.id = uuidv4();
+    this.username = username || generateUsername();
+    this.isHost = isHost;
+  }
+
+  serialize() {
+    return {
+      id: this.id,
+      username: this.username,
+      isHost: this.isHost,
+    };
+  }
 }
 
 function generateUsername(): string {
