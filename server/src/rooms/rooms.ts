@@ -1,7 +1,6 @@
 import { Room } from "./Room";
 import { PokerRoom } from "./PokerRoom";
-
-type RoomType = "poker" | "blackjack";
+import { RoomType } from "../types/rooms.types";
 
 const rooms = new Map<string, Room>();
 

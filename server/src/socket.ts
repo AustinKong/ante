@@ -17,25 +17,30 @@ export function createSocket(httpServer: HttpServer) {
   function listen() {
     io.on("connection", (socket) => {
       const { roomCode, playerId } = socket.data;
+      const room = getRoom(roomCode);
+
+      if (!room) return socket.disconnect(true);
 
       try {
-        const room = getRoom(roomCode);
-        if (!room) return socket.disconnect(true);
-
         room.join(playerId);
         socket.join(roomCode);
       } catch (err) {
         return socket.disconnect(true);
       }
 
-      console.log("Player successfully connected to room:", roomCode);
-
-      socket.on("playerAction", ({ roomCode, action }) => {
-        io.to(roomCode).emit("gameUpdate", action);
+      io.to(roomCode).emit("playerJoined", {
+        player: room.getPlayer(playerId),
       });
 
       socket.on("disconnect", () => {
-        console.log("Socket disconnected:", socket.id);
+        room.leave(playerId);
+        io.to(roomCode).emit("playerLeft", { playerId });
+      });
+
+      socket.on("playerAction", ({ action }) => {
+        room.onAction(playerId, action);
+        const publicRoomState = room.serialize();
+        io.to(roomCode).emit("gameUpdate", publicRoomState);
       });
     });
   }

@@ -1,6 +1,7 @@
 import { Player } from "../players/Player";
+import { RoomPublicState } from "../types/rooms.types";
 
-export class Room {
+export abstract class Room {
   roomCode: string;
   createdAt: number = Date.now();
   maxPlayers: number;
@@ -54,4 +55,15 @@ export class Room {
       );
     }
   }
+
+  getPlayer(playerId: string): Player | undefined {
+    return this.currentPlayers.find((player) => player.id === playerId);
+  }
+
+  abstract onAction(
+    playerId: string,
+    action: { type: string; payload?: any }
+  ): void;
+
+  abstract serialize(): RoomPublicState;
 }

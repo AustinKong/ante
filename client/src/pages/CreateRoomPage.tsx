@@ -32,7 +32,7 @@ const CreateRoomPage = () => {
   });
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
-    const response = await fetch("/api/game/create", {
+    const response = await fetch("/api/game/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

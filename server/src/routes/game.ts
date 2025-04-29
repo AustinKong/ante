@@ -6,7 +6,7 @@ import { generateRoomToken } from "../utils/token";
 
 const gameRouter = express.Router();
 
-gameRouter.post("/create", authenticate, (req, res) => {
+gameRouter.post("/", authenticate, (req, res) => {
   const { roomType, maxPlayers } = req.body;
 
   const host = new Player(true);
