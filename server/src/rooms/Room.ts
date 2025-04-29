@@ -35,7 +35,6 @@ export abstract class Room {
   join(playerId: string): void {
     const pendingPlayer = this.pendingPlayers.get(playerId);
 
-    if (this.isFull()) throw new Error("Room is full");
     if (!pendingPlayer) throw new Error("Player not found");
 
     clearTimeout(pendingPlayer.timeout);
