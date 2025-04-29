@@ -1,11 +1,19 @@
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
+import { PasswordInput } from "@/components/ui/password-input";
+import {
+  Center,
+  VStack,
+  Heading,
+  Field,
+  Input,
+  Button,
+} from "@chakra-ui/react";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async () => {
     const response = await fetch("/api/auth/login", {
@@ -17,32 +25,38 @@ const LoginPage = () => {
     if (response.ok) {
       const { accessToken } = await response.json();
       localStorage.setItem("token", accessToken);
+      navigate("/");
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-muted px-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>Sign in</CardTitle>
-        </CardHeader>
-        <CardContent>
+    <Center h="100vh">
+      <VStack gap="2">
+        <Heading size="lg">Sign in</Heading>
+        <Field.Root>
+          <Field.Label>Email</Field.Label>
           <Input
-            type="email"
-            placeholder="Email"
+            placeholder="Enter your email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(event) => setEmail(event.target.value)}
+            type="email"
           />
-          <Input
-            type="password"
-            placeholder="Password"
+          <Field.HelperText>We'll never share your email</Field.HelperText>
+        </Field.Root>
+        <Field.Root>
+          <Field.Label>Password</Field.Label>
+          <PasswordInput
+            placeholder="Enter your password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(event) => setPassword(event.target.value)}
           />
-          <Button onClick={handleSubmit}>Login</Button>
-        </CardContent>
-      </Card>
-    </div>
+          <Field.HelperText>Must be at least 8 characters</Field.HelperText>
+        </Field.Root>
+        <Button w="100%" onClick={handleSubmit}>
+          Register
+        </Button>
+      </VStack>
+    </Center>
   );
 };
 

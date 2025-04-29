@@ -1,9 +1,11 @@
-import { Button } from "@/components/ui/button";
 import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
+  Center,
+  VStack,
+  Heading,
+  Field,
+  PinInput,
+  Button,
+} from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -28,20 +30,37 @@ const JoinGamePage = () => {
   };
 
   return (
-    <div>
-      <InputOTP
-        maxLength={6}
-        value={roomCode}
-        onChange={(value) => setRoomCode(value)}
-      >
-        <InputOTPGroup>
-          {Array.from({ length: 6 }).map((_, index) => (
-            <InputOTPSlot key={index} index={index} />
-          ))}
-        </InputOTPGroup>
-      </InputOTP>
-      <Button onClick={handleSubmit}>Join Game</Button>
-    </div>
+    <Center h="100vh">
+      <VStack gap="2">
+        <Heading size="lg">Join Game</Heading>
+        <Field.Root>
+          <Field.Label>Room Code</Field.Label>
+          <PinInput.Root
+            otp
+            value={roomCode
+              .padEnd(6, " ")
+              .split("")
+              .map((c) => (c === " " ? "" : c))}
+            onValueChange={(event) => setRoomCode(event.value.join(""))}
+            placeholder=" "
+          >
+            <PinInput.HiddenInput />
+            <PinInput.Control>
+              <PinInput.Input index={0} />
+              <PinInput.Input index={1} />
+              <PinInput.Input index={2} />
+              <PinInput.Input index={3} />
+              <PinInput.Input index={4} />
+              <PinInput.Input index={5} />
+            </PinInput.Control>
+          </PinInput.Root>
+          <Field.HelperText>Enter the room code to join</Field.HelperText>
+        </Field.Root>
+        <Button w="100%" onClick={handleSubmit}>
+          Join Game
+        </Button>
+      </VStack>
+    </Center>
   );
 };
 

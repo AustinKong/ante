@@ -5,7 +5,7 @@ import LoginPage from "@/pages/LoginPage";
 import HomePage from "@/pages/HomePage";
 import JoinRoomPage from "@/pages/JoinRoomPage";
 import CreateRoomPage from "@/pages/CreateRoomPage";
-import GamePage from "./pages/GamePage";
+import GamePage from "@/pages/GamePage";
 
 function App() {
   return (

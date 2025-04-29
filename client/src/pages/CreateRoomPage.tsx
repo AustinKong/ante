@@ -1,44 +1,28 @@
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-
-const formSchema = z.object({
-  maxPlayers: z
-    .string()
-    .transform((val) => Number(val))
-    .pipe(z.number().int().min(1).max(10)),
-});
+  Center,
+  VStack,
+  Heading,
+  Field,
+  Input,
+  Button,
+} from "@chakra-ui/react";
 
 const CreateRoomPage = () => {
+  const [maxPlayers, setMaxPlayers] = useState(2);
   const navigate = useNavigate();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      maxPlayers: 2,
-    },
-  });
-
-  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
+  const handleSubmit = async () => {
     const response = await fetch("/api/game/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        maxPlayers,
+      }),
     });
 
     if (response.ok) {
@@ -49,30 +33,25 @@ const CreateRoomPage = () => {
   };
 
   return (
-    <div>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)}>
-          <FormField
-            control={form.control}
-            name="maxPlayers"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Max players</FormLabel>
-                <FormControl>
-                  <Input {...field} type="number" />
-                </FormControl>
-                <FormDescription>
-                  Maximum number of players that can join the room (including
-                  you)
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+    <Center h="100vh">
+      <VStack gap="2">
+        <Heading size="lg">Create Room</Heading>
+        <Field.Root>
+          <Field.Label>Max Players</Field.Label>
+          <Input
+            placeholder="Enter max players"
+            value={maxPlayers}
+            onChange={(event) =>
+              setMaxPlayers(parseInt(event.target.value, 10))
+            }
           />
-          <Button type="submit">Create room</Button>
-        </form>
-      </Form>
-    </div>
+          <Field.HelperText>Max players in the room</Field.HelperText>
+        </Field.Root>
+        <Button w="100%" onClick={handleSubmit}>
+          Create Room
+        </Button>
+      </VStack>
+    </Center>
   );
 };
 

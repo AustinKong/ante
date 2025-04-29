@@ -1,18 +1,27 @@
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
+import { Center, Link, VStack } from "@chakra-ui/react";
 
 const HomePage = () => {
-  const navigate = useNavigate();
-
   return (
-    <div>
-      <Button onClick={() => navigate("/login")}>Login</Button>
-      <Button onClick={() => navigate("/register")}>Register</Button>
-      {localStorage.getItem("token") && (
-        <Button onClick={() => navigate("/createRoom")}>Create Room</Button>
-      )}
-      <Button onClick={() => navigate("/joinRoom")}>Join Game</Button>
-    </div>
+    <Center h="100vh">
+      <VStack gap="4">
+        <Link asChild>
+          <RouterLink to="/register">Register</RouterLink>
+        </Link>
+        <Link asChild>
+          <RouterLink to="/login">Login</RouterLink>
+        </Link>
+
+        {localStorage.getItem("token") && (
+          <Link asChild>
+            <RouterLink to="/createRoom">Create Room</RouterLink>
+          </Link>
+        )}
+        <Link asChild>
+          <RouterLink to="/joinRoom">Join Game</RouterLink>
+        </Link>
+      </VStack>
+    </Center>
   );
 };
 

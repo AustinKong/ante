@@ -34,7 +34,7 @@ export function createSocket(httpServer: HttpServer) {
 
       socket.on("disconnect", () => {
         room.leave(playerId);
-        io.to(roomCode).emit("playerLeft", { playerId });
+        io.to(roomCode).emit("playerLeft", room.getPlayer(playerId));
       });
 
       socket.on("playerAction", ({ action }) => {
