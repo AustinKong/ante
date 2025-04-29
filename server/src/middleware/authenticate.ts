@@ -20,8 +20,8 @@ function authenticate(
   const accessToken = authHeader.split(" ")[1];
 
   try {
-    const payload = verifyAccessToken(accessToken);
-    req.user = payload as { email: string };
+    const { email } = verifyAccessToken(accessToken) as { email: string };
+    req.user = { email };
     next();
   } catch (err) {
     res.status(403).send("Invalid access token");

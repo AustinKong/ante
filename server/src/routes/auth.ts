@@ -50,13 +50,8 @@ router.post("/login", async (req, res) => {
     },
   });
 
-  if (!user) {
-    res.status(400).send("User not found");
-    return;
-  }
-
-  if (!(await bcrypt.compare(password, user.password))) {
-    res.status(400).send("Invalid password");
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    res.status(401).send("Invalid email or password");
     return;
   }
 
@@ -81,8 +76,7 @@ router.post("/refresh", (req, res) => {
   }
 
   try {
-    const payload = verifyRefreshToken(refreshToken);
-    const email = (payload as { email: string }).email;
+    const { email } = verifyRefreshToken(refreshToken) as { email: string };
     const newAccessToken = generateAccessToken({ email });
     res.json({ accessToken: newAccessToken });
   } catch (err) {

@@ -1,17 +1,28 @@
-import express from "express";
-import cors from "cors";
 import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
+import { createServer } from "http";
+import { createSocket } from "./socket";
+
+import cors from "cors";
 import cookieParser from "cookie-parser";
-import authRouter from "./routes/auth";
 import logger from "./middleware/logger";
+
+import authRouter from "./routes/auth";
 import gameRouter from "./routes/game";
 
-dotenv.config();
-const app = express();
-const PORT = process.env.PORT;
+const app = express(); // Express app
+const httpServer = createServer(app); // Http server wrapper
+const socket = createSocket(httpServer); // Socket.io
 
 /* Middleware */
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CLIENT_ORIGIN,
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 app.use(logger);
@@ -20,6 +31,8 @@ app.use(logger);
 app.use("/api/auth", authRouter);
 app.use("/api/game", gameRouter);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+socket.listen();
+
+httpServer.listen(process.env.PORT, () => {
+  console.log(`Server is running on http://localhost:${process.env.PORT}`);
 });
