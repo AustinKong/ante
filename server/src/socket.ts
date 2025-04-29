@@ -28,13 +28,22 @@ export function createSocket(httpServer: HttpServer) {
         return socket.disconnect(true);
       }
 
-      io.to(roomCode).emit("playerJoined", {
+      // Send required information to joined player
+      socket.emit("roomJoined", {
+        player: room.getPlayer(playerId),
+        gameState: room.serialize(),
+      });
+
+      // Send event to all other players in the room
+      socket.broadcast.to(roomCode).emit("playerJoined", {
         player: room.getPlayer(playerId),
       });
 
       socket.on("disconnect", () => {
         room.leave(playerId);
-        io.to(roomCode).emit("playerLeft", room.getPlayer(playerId));
+        socket.broadcast
+          .to(roomCode)
+          .emit("playerLeft", room.getPlayer(playerId));
       });
 
       socket.on("playerAction", ({ action }) => {
