@@ -4,21 +4,30 @@ import { Popover, Button, Portal, Slider, Group } from "@chakra-ui/react";
 type BetButtonProps = {
   text: string;
   onSubmit?: (amount: number) => void;
-} & ComponentProps<typeof Button>;
+  min: number;
+  max: number;
+} & Omit<ComponentProps<typeof Button>, "onSubmit">;
 
-const BetButton = ({ text, onSubmit, ...buttonProps }: BetButtonProps) => {
-  const [amount, setAmount] = useState(0);
+const BetButton = ({
+  text,
+  onSubmit,
+  min,
+  max,
+  ...buttonProps
+}: BetButtonProps) => {
+  const [amount, setAmount] = useState(min);
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <Popover.Root open={isOpen} onOpenChange={(event) => setIsOpen(event.open)}>
-      <Popover.Trigger asChild {...buttonProps}>
+      <Popover.Trigger asChild>
         <Button
+          {...buttonProps}
+          disabled={buttonProps?.disabled || isOpen}
           onClick={() => {
-            setAmount(0);
+            setAmount(min);
             setIsOpen(true);
           }}
-          disabled={isOpen}
         >
           {text}
         </Button>
@@ -29,9 +38,11 @@ const BetButton = ({ text, onSubmit, ...buttonProps }: BetButtonProps) => {
             <Popover.Arrow />
             <Popover.Body>
               <Slider.Root
+                max={max}
+                min={min}
+                size="lg"
                 value={[amount]}
                 onValueChange={(event) => setAmount(event.value[0])}
-                size="lg"
               >
                 <Slider.Control>
                   <Slider.Track>

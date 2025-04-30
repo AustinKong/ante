@@ -32,6 +32,7 @@ export class PokerRoom extends Room {
     this.playerStates.delete(playerId);
   }
 
+  // TODO: Handle sidepot logic
   onAction(playerId: string, action: { type: string; payload?: any }): void {
     const playerState = this.playerStates.get(playerId);
     if (!playerState) throw new Error("Player not found");
@@ -46,29 +47,72 @@ export class PokerRoom extends Room {
       case "fold":
         playerState.hasFolded = true;
         break;
-      case "raiseTo":
-        const { amount } = action.payload;
-        if (
-          typeof amount !== "number" ||
-          amount <= 0 ||
-          amount > playerState.chips ||
-          amount < playerState.lastBet ||
-          amount < this.currentBet
-        ) {
-          throw new Error("Invalid amount");
+      case "call":
+        const callAmount = this.currentBet - playerState.lastBet;
+
+        if (callAmount > playerState.chips) {
+          throw new Error("Not enough chips to call");
         }
 
-        const additionalBet = amount - playerState.lastBet;
-        playerState.chips -= additionalBet;
-        playerState.lastBet = amount;
+        this.pot += callAmount;
+        playerState.chips -= callAmount;
+        playerState.lastBet = this.currentBet;
+        break;
+      case "check":
+        if (this.currentBet > playerState.lastBet) {
+          throw new Error("You must call or raise to check");
+        }
+        break;
+      // Encapsulates raise and bet
+      case "raiseTo":
+        const { amount } = action.payload;
+        const raiseAmount = amount - playerState.lastBet;
 
-        this.pot += additionalBet;
+        if (
+          !amount ||
+          amount <= this.currentBet ||
+          amount < playerState.lastBet ||
+          raiseAmount > playerState.chips
+        ) {
+          throw new Error("Invalid bet/raise amount");
+        }
+
+        playerState.chips -= raiseAmount;
+        playerState.lastBet = amount;
+        this.pot += raiseAmount;
         this.currentBet = amount;
+        break;
+      case "allIn":
+        const allInAmount = playerState.chips;
+
+        if (playerState.chips <= 0) {
+          throw new Error("You are already all in");
+        }
+
+        playerState.lastBet += allInAmount;
+        this.pot += allInAmount;
+        playerState.chips -= allInAmount;
+
+        if (playerState.lastBet > this.currentBet) {
+          this.currentBet = playerState.lastBet;
+        }
         break;
       default:
         throw new Error("Invalid action");
     }
-    this.turnIndex = (this.turnIndex + 1) % this.currentPlayers.length;
+
+    let loopCount = 0;
+    do {
+      this.turnIndex = (this.turnIndex + 1) % this.currentPlayers.length;
+      loopCount++;
+      if (loopCount > this.currentPlayers.length) {
+        throw new Error("No eligible players left to act");
+      }
+    } while (
+      this.playerStates.get(this.currentPlayers[this.turnIndex].id)
+        ?.hasFolded ||
+      this.playerStates.get(this.currentPlayers[this.turnIndex].id)?.chips === 0
+    );
   }
 
   serialize(): PokerRoomPublicState {

@@ -4,7 +4,7 @@ import {
   Center,
   Container,
   Group,
-  HStack,
+  Grid,
   ProgressCircle,
   Heading,
   Text,
@@ -15,7 +15,7 @@ import BetButton from "@/components/custom/BetButton";
 import { useGame } from "@/hooks/useGame";
 
 const GamePage = () => {
-  const { gameState, playerState, sendAction } = useGame(
+  const { gameState, playerState, isTurn, sendAction } = useGame(
     (player) => {
       toaster.create({
         description: `${player.username} joined the game`,
@@ -28,10 +28,40 @@ const GamePage = () => {
     }
   );
 
-  if (!gameState) {
+  const handleCall = () => {
+    if (!gameState || !playerState) return;
+    sendAction("call");
+  };
+
+  const handleCheck = () => {
+    if (!gameState || !playerState) return;
+    sendAction("check");
+  };
+
+  const handleRaiseTo = (amount: number) => {
+    if (!gameState || !playerState) return;
+    sendAction("raiseTo", { amount });
+  };
+
+  const handleBet = (amount: number) => {
+    if (!gameState || !playerState) return;
+    sendAction("raiseTo", { amount });
+  };
+
+  const handleFold = () => {
+    if (!gameState || !playerState) return;
+    sendAction("fold");
+  };
+
+  const handleAllIn = () => {
+    if (!gameState || !playerState) return;
+    sendAction("allIn");
+  };
+
+  if (!gameState || !playerState) {
     return (
       <Center h="100vh">
-        <ProgressCircle.Root value={null} size="lg">
+        <ProgressCircle.Root size="lg" value={null}>
           <ProgressCircle.Circle>
             <ProgressCircle.Track />
             <ProgressCircle.Range />
@@ -41,63 +71,97 @@ const GamePage = () => {
     );
   }
 
+  const { players, turnIndex } = gameState;
+  const displayedPlayers =
+    players.length >= 3
+      ? [
+          players[(turnIndex - 1 + players.length) % players.length],
+          players[turnIndex],
+          players[(turnIndex + 1) % players.length],
+        ]
+      : players;
+
   return (
     <Container h="100vh">
       <Toaster />
-      <VStack h="full" align="stretch">
+      <VStack align="stretch" h="full">
         {/* Info */}
         <Box textAlign="center">
           <Heading size="lg">Room Code: {gameState.roomCode}</Heading>
         </Box>
-        <HStack gap="4" justifyContent="center">
-          {gameState?.players.map((player) => (
-            <Box textAlign="center">
-              <Text textStyle="md">{player.username}</Text>
-              <Text textStyle="sm" color="fg.subtle">
-                State
-              </Text>
-            </Box>
-          ))}
-        </HStack>
+        <Grid gap="4" templateColumns="1fr auto 1fr">
+          {displayedPlayers.map((player) => {
+            const isCurrent = player.id === players[turnIndex].id;
+
+            return (
+              <Box
+                key={player.id}
+                color={isCurrent ? "fg" : "fg.muted"}
+                textAlign="center"
+              >
+                <Text textStyle="md">
+                  {player.id === playerState.id ? "You" : player.username}
+                </Text>
+                <Text color="fg.subtle" textStyle="sm">
+                  {player.hasFolded ? "Folded" : `$${player.lastBet}`}
+                </Text>
+              </Box>
+            );
+          })}
+        </Grid>
         {/* Game state */}
-        <VStack flex="1" align="stretch">
+        <VStack align="stretch" flex="1">
           <Center
-            borderWidth="1px"
             borderColor="fg.muted"
-            rounded="md"
+            borderWidth="1px"
             flex="1"
+            rounded="md"
           >
             <Text textStyle="md">Pot: ${gameState.pot}</Text>
           </Center>
           <Center
-            borderWidth="1px"
             borderColor="fg.muted"
-            rounded="md"
+            borderWidth="1px"
             flex="1"
+            flexDir="column"
+            rounded="md"
           >
-            <Text textStyle="md">Bet: ${gameState?.currentBet}</Text>
+            <Text textStyle="md">Current bet: ${gameState.currentBet}</Text>
+            <Text textStyle="md">Your bet: ${playerState.lastBet}</Text>
           </Center>
           <Center
-            borderWidth="1px"
             borderColor="fg.muted"
-            rounded="md"
+            borderWidth="1px"
             flex="1"
+            rounded="md"
           >
-            <Text textStyle="md">Chips: ${playerState?.chips}</Text>
+            <Text textStyle="md">Chips: ${playerState.chips}</Text>
           </Center>
         </VStack>
         {/* Player actions */}
-        <Group gap="4">
-          <Button flex="1" onClick={() => sendAction("")}>
-            Call
+        <Group grow gap="4">
+          <Button
+            disabled={!isTurn}
+            onClick={
+              gameState.currentBet > playerState.lastBet
+                ? handleCall
+                : handleCheck
+            }
+          >
+            {gameState.currentBet > playerState.lastBet ? "Call" : "Check"}
           </Button>
           <BetButton
-            flex="1"
-            text="Raise"
-            onSubmit={() => console.log("hey")}
+            disabled={!isTurn}
+            max={playerState.chips}
+            min={gameState.currentBet + 1}
+            text={gameState.currentBet === 0 ? "Bet" : "Raise To"}
+            onSubmit={gameState.currentBet === 0 ? handleBet : handleRaiseTo}
           />
-          <Button flex="1" onClick={() => sendAction("fold")}>
+          <Button disabled={!isTurn} onClick={handleFold}>
             Fold
+          </Button>
+          <Button disabled={!isTurn} onClick={handleAllIn}>
+            All In
           </Button>
         </Group>
       </VStack>

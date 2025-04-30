@@ -11,7 +11,7 @@ import {
 import { authFetch } from "@/utils/authFetch";
 
 const CreateRoomPage = () => {
-  const [maxPlayers, setMaxPlayers] = useState(2);
+  const [maxPlayers, setMaxPlayers] = useState<string>("2");
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
@@ -20,7 +20,7 @@ const CreateRoomPage = () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ maxPlayers }),
+      body: JSON.stringify({ maxPlayers: parseInt(maxPlayers, 10) }),
     });
 
     if (response.ok) {
@@ -39,9 +39,7 @@ const CreateRoomPage = () => {
           <Input
             placeholder="Enter max players"
             value={maxPlayers}
-            onChange={(event) =>
-              setMaxPlayers(parseInt(event.target.value, 10))
-            }
+            onChange={(event) => setMaxPlayers(event.target.value.trim())}
           />
           <Field.HelperText>Max players in the room</Field.HelperText>
         </Field.Root>
