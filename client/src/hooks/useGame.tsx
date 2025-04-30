@@ -35,20 +35,18 @@ export const useGame = (
     });
     socketRef.current = socket;
 
-    socket.on("roomJoined", ({ player, gameState }) => {
-      setPlayer(player);
+    socket.on("roomJoined", ({ player: self, gameState }) => {
+      setPlayer(self);
       setGameState(gameState);
-      onPlayerJoined?.(player);
+      onPlayerJoined?.(self);
       onGameUpdate?.(gameState);
     });
 
     socket.on("playerJoined", ({ player }) => {
-      setPlayer(player);
       onPlayerJoined?.(player);
     });
 
     socket.on("playerLeft", ({ player }) => {
-      setPlayer(null);
       onPlayerLeft?.(player);
     });
 
@@ -63,5 +61,19 @@ export const useGame = (
     };
   }, []);
 
-  return { player, gameState, playerState, setPlayer, setGameState };
+  const sendAction = (actionType: string, payload?: any) => {
+    if (!socketRef.current) return;
+    socketRef.current.emit("playerAction", {
+      action: { type: actionType, payload },
+    });
+  };
+
+  return {
+    player,
+    gameState,
+    playerState,
+    setPlayer,
+    setGameState,
+    sendAction,
+  };
 };

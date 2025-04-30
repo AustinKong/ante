@@ -11,10 +11,11 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { Toaster, toaster } from "@/components/ui/toaster";
+import BetButton from "@/components/custom/BetButton";
 import { useGame } from "@/hooks/useGame";
 
 const GamePage = () => {
-  const { gameState, playerState } = useGame(
+  const { gameState, playerState, sendAction } = useGame(
     (player) => {
       toaster.create({
         description: `${player.username} joined the game`,
@@ -87,9 +88,17 @@ const GamePage = () => {
         </VStack>
         {/* Player actions */}
         <Group gap="4">
-          <Button flex="1">Call</Button>
-          <Button flex="1">Raise</Button>
-          <Button flex="1">Fold</Button>
+          <Button flex="1" onClick={() => sendAction("")}>
+            Call
+          </Button>
+          <BetButton
+            flex="1"
+            text="Raise"
+            onSubmit={() => console.log("hey")}
+          />
+          <Button flex="1" onClick={() => sendAction("fold")}>
+            Fold
+          </Button>
         </Group>
       </VStack>
     </Container>
