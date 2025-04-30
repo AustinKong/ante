@@ -8,21 +8,19 @@ import {
   Input,
   Button,
 } from "@chakra-ui/react";
+import { authFetch } from "@/utils/authFetch";
 
 const CreateRoomPage = () => {
   const [maxPlayers, setMaxPlayers] = useState(2);
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
-    const response = await fetch("/api/game/", {
+    const response = await authFetch("/api/game/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify({
-        maxPlayers,
-      }),
+      body: JSON.stringify({ maxPlayers }),
     });
 
     if (response.ok) {
