@@ -13,6 +13,7 @@ import {
 import { Toaster, toaster } from "@/components/ui/toaster";
 import BetButton from "@/components/custom/BetButton";
 import { useGame } from "@/hooks/useGame";
+import ChipPile from "@/components/custom/ChipPile";
 
 const GamePage = () => {
   const { gameState, playerState, isTurn, sendAction } = useGame(
@@ -111,32 +112,45 @@ const GamePage = () => {
         </Grid>
         {/* Game state */}
         <VStack align="stretch" flex="1">
-          <Center
+          <VStack
+            alignItems="center"
             borderColor="fg.muted"
             borderWidth="1px"
             flex="1"
+            justifyContent="space-between"
+            padding="2"
             rounded="md"
           >
             <Text textStyle="md">Pot: ${gameState.pot}</Text>
-          </Center>
-          <Center
+            <ChipPile count={gameState.pot / 100} />
+          </VStack>
+
+          <VStack
+            alignItems="center"
             borderColor="fg.muted"
             borderWidth="1px"
             flex="1"
-            flexDir="column"
+            justifyContent="space-between"
+            padding="2"
             rounded="md"
           >
             <Text textStyle="md">Current bet: ${gameState.currentBet}</Text>
             <Text textStyle="md">Your bet: ${playerState.lastBet}</Text>
-          </Center>
-          <Center
+            <ChipPile count={playerState.lastBet / 100} />
+          </VStack>
+
+          <VStack
+            alignItems="center"
             borderColor="fg.muted"
             borderWidth="1px"
             flex="1"
+            justifyContent="space-between"
+            padding="2"
             rounded="md"
           >
             <Text textStyle="md">Chips: ${playerState.chips}</Text>
-          </Center>
+            <ChipPile count={playerState.chips / 100} />
+          </VStack>
         </VStack>
         {/* Player actions */}
         <Group grow gap="4">
@@ -152,7 +166,7 @@ const GamePage = () => {
           </Button>
           <BetButton
             disabled={!isTurn}
-            max={playerState.chips}
+            max={gameState.currentBet + playerState.chips - 1}
             min={gameState.currentBet + 1}
             text={gameState.currentBet === 0 ? "Bet" : "Raise To"}
             onSubmit={gameState.currentBet === 0 ? handleBet : handleRaiseTo}
