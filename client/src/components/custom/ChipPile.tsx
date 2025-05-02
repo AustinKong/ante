@@ -16,10 +16,11 @@ const DURATION = 0.2;
 const POISSON_WIDTH = 300;
 const POISSON_HEIGHT = 100;
 const POISSON_MIN_DISTANCE = 31;
+const POISSON_MAX_DISTANCE = 35;
 const SQUASH_Y = 0.85;
 
-const MIN_CHIPS = 5;
-const MAX_CHIPS = 12;
+const MIN_CHIPS = 3;
+const MAX_CHIPS = 10;
 const X_EXPONENT = 2; // higher = steeper drop-off along x
 const Y_EXPONENT = 1; // higher = steeper drop-off along y
 
@@ -46,6 +47,7 @@ const ChipPile = ({
     const sampler = new PoissonDiskSampling({
       shape: [POISSON_WIDTH, POISSON_HEIGHT],
       minDistance: POISSON_MIN_DISTANCE,
+      maxDistance: POISSON_MAX_DISTANCE,
       tries: 10,
     });
     const all = sampler.fill();
@@ -171,15 +173,15 @@ const ChipPile = ({
   }, [batchSize, count, isAnimating, stacks]);
 
   return (
-    <Container height="full" position="relative" w="full">
+    <Container height="full" overflow="hidden" position="relative" w="full">
       {stacks.map((stack, index) => {
         return (
           <Box
             key={index}
-            bottom={`calc(40% + ${stack.y}px)`}
+            bottom={`calc(30% + ${stack.y}px)`}
             left={`calc(50% + ${stack.x}px)`}
             position="absolute"
-            zIndex={-stack.y}
+            zIndex={100 - stack.y}
           >
             <Stack chips={stack.chips} />
           </Box>
@@ -241,7 +243,11 @@ const Chip = ({ index, xOffset }: { index: number; xOffset: number }) => {
         draggable={false}
         height={`${CHIP_HEIGHT}px`}
         src={ChipImage}
-        style={{ transform: `translateX(calc(-50% + ${xOffset}px))` }}
+        style={{
+          transform: `translateX(calc(-50% + ${xOffset}px))`,
+          filter:
+            index === 0 ? `drop-shadow(2px 0px 2px rgba(0, 0, 0, 0.3))` : "",
+        }}
       />
     </MotionBox>
   );

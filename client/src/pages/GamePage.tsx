@@ -1,9 +1,7 @@
 import {
   Box,
-  Button,
   Center,
   Container,
-  Group,
   Grid,
   ProgressCircle,
   Heading,
@@ -11,9 +9,15 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { Toaster, toaster } from "@/components/ui/toaster";
-import BetButton from "@/components/custom/BetButton";
 import { useGame } from "@/hooks/useGame";
+import {
+  CasinoOutlined,
+  CheckCircleOutlined,
+  PanToolOutlined,
+  AccountBalanceWalletOutlined,
+} from "@mui/icons-material";
 import ChipPile from "@/components/custom/ChipPile";
+import ActionBar from "@/components/custom/ActionBar";
 
 const GamePage = () => {
   const { gameState, playerState, isTurn, sendAction } = useGame(
@@ -83,8 +87,9 @@ const GamePage = () => {
       : players;
 
   return (
-    <Container h="100vh">
+    <Container h="100vh" p="2">
       <Toaster />
+
       <VStack align="stretch" h="full">
         {/* Info */}
         <Box textAlign="center">
@@ -112,72 +117,59 @@ const GamePage = () => {
         </Grid>
         {/* Game state */}
         <VStack align="stretch" flex="1">
-          <VStack
-            alignItems="center"
-            borderColor="fg.muted"
-            borderWidth="1px"
-            flex="1"
-            justifyContent="space-between"
-            padding="2"
-            rounded="md"
-          >
-            <Text textStyle="md">Pot: ${gameState.pot}</Text>
+          <VStack alignItems="center" flex="1" gap="2">
+            <Text textStyle="lg">Pot: ${gameState.pot}</Text>
             <ChipPile count={gameState.pot / 20} />
           </VStack>
 
-          <VStack
-            alignItems="center"
-            borderColor="fg.muted"
-            borderWidth="1px"
-            flex="1"
-            justifyContent="space-between"
-            padding="2"
-            rounded="md"
-          >
+          <VStack alignItems="center" flex="1" gap="2">
             <Text textStyle="md">Current bet: ${gameState.currentBet}</Text>
             <Text textStyle="md">Your bet: ${playerState.lastBet}</Text>
             <ChipPile count={playerState.lastBet / 20} />
           </VStack>
 
-          <VStack
-            alignItems="center"
-            borderColor="fg.muted"
-            borderWidth="1px"
-            flex="1"
-            justifyContent="space-between"
-            padding="2"
-            rounded="md"
-          >
+          <VStack alignItems="center" flex="1" gap="2">
             <Text textStyle="md">Chips: ${playerState.chips}</Text>
             <ChipPile count={playerState.chips / 20} />
           </VStack>
         </VStack>
         {/* Player actions */}
-        <Group grow gap="4">
-          <Button
-            disabled={!isTurn}
-            onClick={
-              gameState.currentBet > playerState.lastBet
-                ? handleCall
-                : handleCheck
-            }
-          >
-            {gameState.currentBet > playerState.lastBet ? "Call" : "Check"}
-          </Button>
-          <BetButton
-            disabled={!isTurn}
-            max={gameState.currentBet + playerState.chips - 1}
-            min={gameState.currentBet + 1}
-            text={gameState.currentBet === 0 ? "Bet" : "Raise To"}
-            onSubmit={gameState.currentBet === 0 ? handleBet : handleRaiseTo}
-          />
-          <Button disabled={!isTurn} onClick={handleFold}>
-            Fold
-          </Button>
-          <Button disabled={!isTurn} onClick={handleAllIn}>
-            All In
-          </Button>
-        </Group>
+        <ActionBar
+          actions={[
+            {
+              label:
+                gameState.currentBet > playerState.lastBet ? "Call" : "Check",
+              icon: <CheckCircleOutlined />,
+              onClick:
+                gameState.currentBet > playerState.lastBet
+                  ? handleCall
+                  : handleCheck,
+            },
+            {
+              label: gameState.currentBet === 0 ? "Bet" : "Raise To",
+              icon: <CasinoOutlined />,
+              onClick: () => {},
+              sliderConfig: {
+                min: gameState.currentBet + 1,
+                max: playerState.chips + gameState.currentBet,
+                title: gameState.currentBet === 0 ? "Bet" : "Raise To",
+                onSubmit:
+                  gameState.currentBet === 0 ? handleBet : handleRaiseTo,
+              },
+            },
+            {
+              label: "Fold",
+              icon: <PanToolOutlined />,
+              onClick: handleFold,
+            },
+            {
+              label: "All In",
+              icon: <AccountBalanceWalletOutlined />,
+              onClick: handleAllIn,
+            },
+          ]}
+          disabled={!isTurn}
+        />
       </VStack>
     </Container>
   );
