@@ -122,7 +122,7 @@ const GamePage = () => {
             rounded="md"
           >
             <Text textStyle="md">Pot: ${gameState.pot}</Text>
-            <ChipPile count={gameState.pot / 100} />
+            <ChipPile count={gameState.pot / 20} />
           </VStack>
 
           <VStack
@@ -136,7 +136,7 @@ const GamePage = () => {
           >
             <Text textStyle="md">Current bet: ${gameState.currentBet}</Text>
             <Text textStyle="md">Your bet: ${playerState.lastBet}</Text>
-            <ChipPile count={playerState.lastBet / 100} />
+            <ChipPile count={playerState.lastBet / 20} />
           </VStack>
 
           <VStack
@@ -149,7 +149,7 @@ const GamePage = () => {
             rounded="md"
           >
             <Text textStyle="md">Chips: ${playerState.chips}</Text>
-            <ChipPile count={playerState.chips / 100} />
+            <ChipPile count={playerState.chips / 20} />
           </VStack>
         </VStack>
         {/* Player actions */}
