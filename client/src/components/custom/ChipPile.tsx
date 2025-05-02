@@ -1,12 +1,17 @@
 import { Box, Container, Image, VStack } from "@chakra-ui/react";
-import ChipImage from "./Chip.png";
 import { motion, AnimatePresence } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import ChipImage from "./Chip.png";
 
 const MotionBox = motion.create(Box);
 const MotionVStack = motion.create(VStack);
 
 const PILE_Y_SCALE = 0.992; // As pile is further to "camera" it gets scaled by this y-scale
+const CHIP_HEIGHT = 20;
+const CHIP_OVERLAP = 13;
+const CHIP_MAX_X_OFFSET = 1;
+const STAGGER = 0.05;
+const DURATION = 0.2;
 
 interface ChipStack3D {
   weight: number; // Priority, higher priority means chips are added to here first
@@ -19,63 +24,134 @@ interface ChipPile3D {
   stacks: ChipStack3D[];
 }
 
-const chipPiles: ChipPile3D[] = [
+const CHIP_PILES: ChipPile3D[] = [
   {
     stacks: [
-      { weight: 1, maxChips: 8, x: 10, y: -10 },
-      { weight: 2, maxChips: 12, x: -20, y: 0 },
-      { weight: 3, maxChips: 16, x: 15, y: 10 },
+      { weight: 1, maxChips: 3, x: -40, y: -25 },
+      { weight: 2, maxChips: 8, x: 10, y: -20 },
+      { weight: 3, maxChips: 11, x: 30, y: -5 },
+      { weight: 4, maxChips: 12, x: -20, y: 0 },
+      { weight: 5, maxChips: 16, x: 15, y: 10 },
     ],
   },
 ];
 
-const ChipPile = ({ count }: { count: number }) => {
-  count = Math.floor(count);
-  const chipPile = useRef<ChipPile3D>(
-    chipPiles[Math.floor(Math.random() * chipPiles.length)]
-  );
-  const stacks: number[] = [];
-  let remaining = count;
+type StackState = {
+  chips: { id: number; xOffset: number }[];
+} & ChipStack3D;
 
-  chipPile.current.stacks.forEach((stack) => {
-    const take = Math.min(stack.maxChips, remaining);
-    stacks.push(take);
-    remaining -= take;
+function getAddStackIndex(stacks: StackState[]): number {
+  let index = 0;
+  let maxWeight = -1;
+  stacks.forEach((stack, i) => {
+    if (stack.weight > maxWeight && stack.chips.length < stack.maxChips) {
+      maxWeight = stack.weight;
+      index = i;
+    }
   });
+  return index;
+}
 
-  // console.log(remaining);
+function getRemoveStackIndex(stacks: StackState[]): number {
+  let index = 0;
+  let minWeight = Number.MAX_VALUE;
+  stacks.forEach((stack, i) => {
+    if (stack.weight < minWeight && stack.chips.length > 0) {
+      minWeight = stack.weight;
+      index = i;
+    }
+  });
+  return index;
+}
+
+// Increase batchSize to increase the number of chips added/removed at once, helps performance
+const ChipPile = ({
+  count,
+  batchSize = 3,
+}: {
+  count: number;
+  batchSize?: number;
+}) => {
+  count = Math.floor(count);
+
+  const chipIdRef = useRef<number>(0);
+  const [stacks, setStacks] = useState<StackState[]>(() =>
+    CHIP_PILES[Math.floor(Math.random() * CHIP_PILES.length)].stacks.map(
+      (stack) => ({
+        ...stack,
+        chips: [],
+      })
+    )
+  );
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    if (isAnimating) return;
+    if (stacks.reduce((acc, stack) => acc + stack.chips.length, 0) === count)
+      return;
+
+    setStacks((prev) => {
+      const totalChips = prev.reduce(
+        (acc, stack) => acc + stack.chips.length,
+        0
+      );
+      setTimeout(() => setIsAnimating(false), STAGGER * 1000);
+      setIsAnimating(true);
+      if (totalChips < count) {
+        const index = getAddStackIndex(prev);
+        return prev.map((stack, i) => ({
+          ...stack,
+          chips:
+            i === index
+              ? [
+                  ...stack.chips,
+                  ...Array.from(
+                    { length: Math.min(batchSize, count - totalChips) },
+                    () => ({
+                      id: chipIdRef.current++,
+                      xOffset: Math.round(
+                        Math.random() * (CHIP_MAX_X_OFFSET * 2) -
+                          CHIP_MAX_X_OFFSET
+                      ),
+                    })
+                  ),
+                ]
+              : stack.chips,
+        }));
+      } else {
+        const index = getRemoveStackIndex(prev);
+        return prev.map((stack, i) => ({
+          ...stack,
+          chips:
+            i === index
+              ? stack.chips.slice(0, -Math.min(batchSize, totalChips - count))
+              : stack.chips,
+        }));
+      }
+    });
+  }, [batchSize, count, isAnimating, stacks]);
 
   return (
     <Container height="full" position="relative" w="full">
-      <AnimatePresence>
-        {stacks.map((stack, index) => {
-          const y = chipPile.current.stacks[index].y;
-          const x = chipPile.current.stacks[index].x;
-          const scale = Math.pow(PILE_Y_SCALE, y);
-          return (
-            <Box
-              key={index}
-              bottom={`calc(25% + ${y}px)`}
-              left={`calc(50% + ${x}px)`}
-              position="absolute"
-              style={{ transform: `scale(${scale})` }}
-              transformOrigin="center bottom"
-              zIndex={-y}
-            >
-              <Stack count={stack} />
-            </Box>
-          );
-        })}
-      </AnimatePresence>
+      {stacks.map((stack, index) => {
+        const scale = Math.pow(PILE_Y_SCALE, stack.y);
+        return (
+          <Box
+            key={index}
+            bottom={`calc(25% + ${stack.y}px)`}
+            left={`calc(50% + ${stack.x}px)`}
+            position="absolute"
+            style={{ transform: `scale(${scale})` }}
+            transformOrigin="center bottom"
+            zIndex={-stack.y}
+          >
+            <Stack chips={stack.chips} />
+          </Box>
+        );
+      })}
     </Container>
   );
 };
-
-const CHIP_HEIGHT = 20;
-const CHIP_OVERLAP = 13;
-const CHIP_MAX_X_OFFSET = 1;
-const STAGGER = 0.05;
-const DURATION = 0.2;
 
 const chipVariants = {
   hide: {
@@ -102,33 +178,7 @@ const chipVariants = {
   },
 };
 
-const Stack = ({ count }: { count: number }) => {
-  const chipIdRef = useRef<number>(0);
-  const [chips, setChips] = useState<{ id: number; xOffset: number }[]>([]);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  useEffect(() => {
-    if (isAnimating) return;
-
-    if (chips.length < count) {
-      setIsAnimating(true);
-      setChips((prev) => [
-        ...prev,
-        {
-          id: chipIdRef.current++,
-          xOffset: Math.round(
-            Math.random() * (CHIP_MAX_X_OFFSET * 2) - CHIP_MAX_X_OFFSET
-          ),
-        },
-      ]);
-      setTimeout(() => setIsAnimating(false), STAGGER * 1000);
-    } else if (chips.length > count) {
-      setIsAnimating(true);
-      setChips((prev) => prev.slice(0, -1));
-      setTimeout(() => setIsAnimating(false), STAGGER * 1000);
-    }
-  }, [count, isAnimating, chips]);
-
+const Stack = ({ chips }: { chips: { id: number; xOffset: number }[] }) => {
   return (
     <MotionVStack flexDirection="column-reverse" gap="0">
       <AnimatePresence initial={true}>
@@ -150,6 +200,7 @@ const Chip = ({ index, xOffset }: { index: number; xOffset: number }) => {
       overflowY="visible"
       variants={chipVariants}
       zIndex={index}
+      layout
     >
       <Image
         draggable={false}
@@ -162,131 +213,3 @@ const Chip = ({ index, xOffset }: { index: number; xOffset: number }) => {
 };
 
 export default ChipPile;
-
-// Alternative solution to staggered chip animation: JIC the current system does not work out of the blue
-/*
-const CHIP_HEIGHT = 20;
-const CHIP_OVERLAP = 13;
-const STAGGER = 0.05;
-
-const chipVariants = {
-  hide: ([, exitIndex]: [number, number]) => ({
-    opacity: 0,
-    y: "-20px",
-    transition: {
-      delay: exitIndex * STAGGER,
-      duration: 0.2,
-      type: "spring",
-      stiffness: 300,
-      damping: 20,
-      mass: 0.5,
-    },
-  }),
-  show: ([enterIndex]: [number, number]) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: enterIndex * STAGGER,
-      duration: 0.2,
-      type: "spring",
-      stiffness: 300,
-      damping: 20,
-      mass: 0.5,
-    },
-  }),
-};
-
-const Stack = ({ count }: { count: number }) => {
-  const chipIdRef = useRef<number>(0);
-  const [chips, setChips] = useState<{ id: number; offset: number }[]>(() =>
-    Array.from({ length: count }, () => ({
-      id: chipIdRef.current++,
-      offset: 0,
-    }))
-  );
-  const isRemoving = useRef(false);
-  const pendingAdds = useRef(0);
-
-  useEffect(() => {
-    setChips((prev) => {
-      if (prev.length < count && !isRemoving.current) {
-        return [
-          ...prev,
-          ...Array.from({ length: count - prev.length }, () => ({
-            id: chipIdRef.current++,
-            offset: prev.length,
-          })),
-        ];
-      } else if (prev.length < count && isRemoving.current) {
-        pendingAdds.current = count - prev.length;
-        return prev;
-      } else if (prev.length > count) {
-        isRemoving.current = true;
-        return prev.slice(0, count);
-      } else {
-        return prev;
-      }
-    });
-  }, [count]);
-
-  const handleExitComplete = () => {
-    if (pendingAdds.current > 0) {
-      setChips((prev) => [
-        ...prev,
-        ...Array.from({ length: pendingAdds.current }, () => ({
-          id: chipIdRef.current++,
-          offset: prev.length,
-        })),
-      ]);
-      pendingAdds.current = 0;
-    }
-    isRemoving.current = false;
-  };
-
-  return (
-    <MotionVStack flexDirection="column-reverse" gap="0" position="relative">
-      <AnimatePresence initial={true} onExitComplete={handleExitComplete}>
-        {chips.map((chip, i, arr) => {
-          const enterIndex = i - chip.offset;
-          const exitIndex = arr.length - 1 - i;
-          return (
-            <Chip
-              key={chip.id}
-              enterIndex={enterIndex}
-              exitIndex={exitIndex}
-              absIndex={i}
-            />
-          );
-        })}
-      </AnimatePresence>
-    </MotionVStack>
-  );
-};
-
-const Chip = ({
-  enterIndex,
-  exitIndex,
-  absIndex,
-}: {
-  enterIndex: number;
-  exitIndex: number;
-  absIndex: number;
-}) => {
-  return (
-    <MotionBox
-      animate="show"
-      custom={[enterIndex, exitIndex]}
-      exit="hide"
-      height={`${CHIP_HEIGHT - CHIP_OVERLAP}px`}
-      initial="hide"
-      overflowY="visible"
-      variants={chipVariants}
-      zIndex={absIndex}
-    >
-      <Image draggable={false} height={`${CHIP_HEIGHT}px`} src={ChipImage} />
-    </MotionBox>
-  );
-};
-
-export default ChipPile;
-*/

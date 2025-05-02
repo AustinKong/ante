@@ -24,7 +24,7 @@ export class PokerRoom extends Room {
 
   join(playerId: string): void {
     super.join(playerId);
-    this.playerStates.set(playerId, new PokerPlayerState(1000));
+    this.playerStates.set(playerId, new PokerPlayerState(5300));
   }
 
   leave(playerId: string): void {
