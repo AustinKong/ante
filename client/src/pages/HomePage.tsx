@@ -1,27 +1,75 @@
+import {
+  Box,
+  Image,
+  Button,
+  VStack,
+  Text,
+  Link,
+  Heading,
+} from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
-import { Center, Link, VStack } from "@chakra-ui/react";
+import FiniteCarousel from "@/components/custom/FiniteCarousel";
+
+const CAROUSEL_CONTENTS = [
+  {
+    image: "/Slide1.png",
+    title: "No poker chips? No problem.",
+    description:
+      "Track bets and chip stacks with your phone — no physical chips needed.",
+  },
+  {
+    image: "/Slide1.png",
+    title: "Play physically, track digitally.",
+    description:
+      "You handle the cards, we handle the chips — fair, fast, and fuss-free.",
+  },
+  {
+    image: "/Slide1.png",
+    title: "Host or join a game instantly.",
+    description:
+      "Just share a room code. Play anywhere, anytime — no setup required.",
+  },
+];
 
 const HomePage = () => {
   return (
-    <Center h="100vh">
-      <VStack gap="4">
-        <Link asChild>
-          <RouterLink to="/register">Register</RouterLink>
-        </Link>
-        <Link asChild>
-          <RouterLink to="/login">Login</RouterLink>
-        </Link>
+    <VStack h="100vh" p="4" w="full" gap="4">
+      <Box flex="1" w="full">
+        <FiniteCarousel>
+          {CAROUSEL_CONTENTS.map((content, index) => (
+            <VStack key={index} alignItems="center" textAlign="center">
+              <Image draggable="false" src={content.image} />
+              <Heading fontWeight="bold" size="xl">
+                {content.title}
+              </Heading>
+              <Text>{content.description}</Text>
+            </VStack>
+          ))}
+        </FiniteCarousel>
+      </Box>
 
-        {localStorage.getItem("token") && (
-          <Link asChild>
-            <RouterLink to="/createRoom">Create Room</RouterLink>
-          </Link>
-        )}
-        <Link asChild>
-          <RouterLink to="/joinRoom">Join Game</RouterLink>
-        </Link>
+      <VStack gap="2" w="full">
+        <Button asChild size="lg" w="full">
+          <RouterLink to="/joinRoom">Join a game</RouterLink>
+        </Button>
+        <Button asChild size="lg" w="full">
+          <RouterLink to="/debug">Host a game</RouterLink>
+        </Button>
       </VStack>
-    </Center>
+
+      <Text color="fg.muted" fontSize="sm" lineHeight="1.2" textAlign="center">
+        By pressing the buttons above, you agree to our
+        <br />
+        <Link asChild color="fg" variant="underline">
+          <RouterLink to="/debug">Terms of Service</RouterLink>
+        </Link>{" "}
+        and{" "}
+        <Link asChild color="fg" variant="underline">
+          <RouterLink to="/debug">Privacy Policy</RouterLink>
+        </Link>
+        .
+      </Text>
+    </VStack>
   );
 };
 

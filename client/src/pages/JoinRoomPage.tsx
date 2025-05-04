@@ -37,12 +37,12 @@ const JoinGamePage = () => {
           <Field.Label>Room Code</Field.Label>
           <PinInput.Root
             otp
+            placeholder=" "
             value={roomCode
               .padEnd(6, " ")
               .split("")
               .map((c) => (c === " " ? "" : c))}
             onValueChange={(event) => setRoomCode(event.value.join(""))}
-            placeholder=" "
           >
             <PinInput.HiddenInput />
             <PinInput.Control>
