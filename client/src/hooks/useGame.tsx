@@ -32,7 +32,7 @@ export const useGame = (
     const roomToken = localStorage.getItem("roomToken");
     if (!roomToken) return;
 
-    const socket = io("http://localhost:3000", {
+    const socket = io({
       auth: { token: roomToken },
     });
     socketRef.current = socket;
