@@ -11,6 +11,10 @@ export class Player {
     this.isHost = isHost;
   }
 
+  updateInfo(username: string, avatar: number) {
+    this.username = username;
+  }
+
   serialize() {
     return {
       id: this.id,

@@ -37,9 +37,12 @@ const CreateRoomPage = () => {
     });
 
     if (response.ok) {
-      const { roomCode, roomToken } = await response.json();
+      const { roomCode, roomToken, player } = await response.json();
       localStorage.setItem("roomToken", roomToken);
-      navigate(`/game/${roomCode}`);
+      sessionStorage.setItem("username", player.username);
+      navigate(`/game/${roomCode}/playerCustomization`);
+    } else {
+      navigate("/");
     }
   };
 
