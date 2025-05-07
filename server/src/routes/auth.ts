@@ -5,6 +5,7 @@ import {
   generateRefreshToken,
   verifyRefreshToken,
 } from "../utils/token";
+import authenticate, { AuthenticatedRequest } from "../middleware/authenticate";
 import prisma from "../prisma";
 
 const router = express.Router();
@@ -82,6 +83,12 @@ router.post("/refresh", (req, res) => {
   } catch (err) {
     res.status(403).send("Invalid refresh token");
   }
+});
+
+router.get("/user", authenticate, (req: AuthenticatedRequest, res) => {
+  res.json({
+    user: req.user,
+  });
 });
 
 export default router;

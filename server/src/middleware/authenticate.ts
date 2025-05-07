@@ -24,7 +24,7 @@ function authenticate(
     req.user = { email };
     next();
   } catch (err) {
-    res.status(403).send("Invalid access token");
+    res.status(401).send("Invalid access token");
   }
 }
 
