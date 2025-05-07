@@ -50,7 +50,6 @@ const ActionBar = ({ disabled = false, actions }: ActionBarProps) => {
       }}
     >
       <Drawer.Backdrop />
-      {/* <Drawer.Trigger /> */}
       <Drawer.Positioner>
         <Drawer.Content>
           <Drawer.Header>

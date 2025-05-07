@@ -37,9 +37,9 @@ const LoginPage = () => {
           <Field.Label>Email</Field.Label>
           <Input
             placeholder="Enter your email"
+            type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            type="email"
           />
           <Field.HelperText>We'll never share your email</Field.HelperText>
         </Field.Root>
@@ -52,7 +52,7 @@ const LoginPage = () => {
           />
           <Field.HelperText>Must be at least 8 characters</Field.HelperText>
         </Field.Root>
-        <Button w="100%" onClick={handleSubmit}>
+        <Button w="full" onClick={handleSubmit}>
           Register
         </Button>
       </VStack>

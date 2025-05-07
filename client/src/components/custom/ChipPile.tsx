@@ -173,7 +173,7 @@ const ChipPile = ({
   }, [batchSize, count, isAnimating, stacks]);
 
   return (
-    <Container height="full" overflow="hidden" position="relative" w="full">
+    <Container h="full" overflow="hidden" position="relative" w="full">
       {stacks.map((stack, index) => {
         return (
           <Box

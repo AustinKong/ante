@@ -2,11 +2,11 @@ import {
   Box,
   Center,
   Container,
-  Grid,
   ProgressCircle,
   Heading,
-  Text,
   VStack,
+  IconButton,
+  HStack,
 } from "@chakra-ui/react";
 import { Toaster, toaster } from "@/components/ui/toaster";
 import { useGame } from "@/hooks/useGame";
@@ -15,9 +15,13 @@ import {
   CheckCircleOutlined,
   PanToolOutlined,
   AccountBalanceWalletOutlined,
+  ChevronLeft,
+  PauseOutlined,
 } from "@mui/icons-material";
 import ChipPile from "@/components/custom/ChipPile";
 import ActionBar from "@/components/custom/ActionBar";
+import FiniteCarousel from "@/components/custom/FiniteCarousel";
+import TurnCarousel from "@/components/custom/TurnCarousel";
 
 const GamePage = () => {
   const { gameState, playerState, isTurn, sendAction } = useGame(
@@ -77,62 +81,90 @@ const GamePage = () => {
   }
 
   const { players, turnIndex } = gameState;
-  const displayedPlayers =
-    players.length >= 3
-      ? [
-          players[(turnIndex - 1 + players.length) % players.length],
-          players[turnIndex],
-          players[(turnIndex + 1) % players.length],
-        ]
-      : players;
 
   return (
-    <Container h="100vh" p="2">
+    <Container h="100svh" p="2">
       <Toaster />
 
       <VStack align="stretch" h="full">
         {/* Info */}
-        <Box textAlign="center">
-          <Heading size="lg">Room Code: {gameState.roomCode}</Heading>
-        </Box>
-        <Grid gap="4" templateColumns="1fr auto 1fr">
-          {displayedPlayers.map((player) => {
-            const isCurrent = player.id === players[turnIndex].id;
+        <HStack
+          alignItems="center"
+          justifyContent="space-between"
+          mb="2"
+          textAlign="center"
+        >
+          <IconButton variant="ghost">
+            <ChevronLeft />
+          </IconButton>
+          <Heading size="lg">TEMPORARY</Heading>
+          <IconButton variant="ghost">
+            <PauseOutlined />
+          </IconButton>
+        </HStack>
+        <TurnCarousel
+          players={players.map((player) => ({
+            username: player.id === playerState.id ? "You" : player.username,
+            chips: player.chips,
+            statusText:
+              player.id === players[turnIndex].id
+                ? "Thinking..."
+                : player.hasFolded
+                ? "Folded"
+                : `$${player.lastBet}`,
+          }))}
+          turnIndex={turnIndex}
+        />
 
-            return (
-              <Box
-                key={player.id}
-                color={isCurrent ? "fg" : "fg.muted"}
-                textAlign="center"
-              >
-                <Text textStyle="md">
-                  {player.id === playerState.id ? "You" : player.username}
-                </Text>
-                <Text color="fg.subtle" textStyle="sm">
-                  {player.hasFolded ? "Folded" : `$${player.lastBet}`}
-                </Text>
-              </Box>
-            );
-          })}
-        </Grid>
         {/* Game state */}
-        <VStack align="stretch" flex="1">
-          <VStack alignItems="center" flex="1" gap="2">
-            <Text textStyle="lg">Pot: ${gameState.pot}</Text>
-            <ChipPile count={gameState.pot / 20} />
+        <FiniteCarousel>
+          <VStack w="full">
+            <VStack gap="0">
+              <Heading color="fg.subtle" size="sm">
+                Pot
+              </Heading>
+              <Heading fontWeight="bolder" size="5xl">
+                ${gameState.pot}
+              </Heading>
+            </VStack>
+            <Box h="35vh" w="full">
+              <ChipPile count={gameState.pot / 20} />
+            </Box>
           </VStack>
 
-          <VStack alignItems="center" flex="1" gap="2">
-            <Text textStyle="md">Current bet: ${gameState.currentBet}</Text>
-            <Text textStyle="md">Your bet: ${playerState.lastBet}</Text>
-            <ChipPile count={playerState.lastBet / 20} />
+          <VStack w="full">
+            <VStack gap="0">
+              <Heading color="fg.subtle" size="sm">
+                Current Bet
+              </Heading>
+              <Heading size="3xl">${gameState.currentBet}</Heading>
+            </VStack>
+            <VStack gap="0">
+              <Heading color="fg.subtle" size="sm">
+                Your Bet
+              </Heading>
+              <Heading size="3xl">${playerState.lastBet}</Heading>
+            </VStack>
+            <Box h="35vh" w="full">
+              <ChipPile count={playerState.lastBet / 20} />
+            </Box>
           </VStack>
 
-          <VStack alignItems="center" flex="1" gap="2">
-            <Text textStyle="md">Chips: ${playerState.chips}</Text>
-            <ChipPile count={playerState.chips / 20} />
+          <VStack w="full">
+            <VStack gap="0">
+              <Heading color="fg.subtle" size="sm">
+                Your chips
+              </Heading>
+              <Heading fontWeight="bolder" size="5xl">
+                ${playerState.chips}
+              </Heading>
+            </VStack>
+            <Box h="35vh" w="full">
+              <ChipPile count={playerState.chips / 20} />
+            </Box>
           </VStack>
-        </VStack>
+        </FiniteCarousel>
+
         {/* Player actions */}
         <ActionBar
           actions={[

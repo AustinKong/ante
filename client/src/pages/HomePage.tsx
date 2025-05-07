@@ -33,7 +33,7 @@ const CAROUSEL_CONTENTS = [
 
 const HomePage = () => {
   return (
-    <VStack h="100vh" p="4" w="full" gap="4">
+    <VStack gap="4" h="100vh" p="4" w="full">
       <Box flex="1" w="full">
         <FiniteCarousel>
           {CAROUSEL_CONTENTS.map((content, index) => (
@@ -53,7 +53,7 @@ const HomePage = () => {
           <RouterLink to="/joinRoom">Join a game</RouterLink>
         </Button>
         <Button asChild size="lg" w="full">
-          <RouterLink to="/debug">Host a game</RouterLink>
+          <RouterLink to="/createRoom">Host a game</RouterLink>
         </Button>
       </VStack>
 
