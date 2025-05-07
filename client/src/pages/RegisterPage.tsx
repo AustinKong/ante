@@ -7,27 +7,18 @@ import {
   Field,
   Input,
   Button,
+  Text,
+  Link,
 } from "@chakra-ui/react";
+import { Link as RouterLink } from "react-router-dom";
 import { PasswordInput } from "@/components/ui/password-input";
+import { useAuth } from "@/hooks/useAuth";
 
 const RegisterPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-
-  const handleSubmit = async () => {
-    const response = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (response.ok) {
-      const { accessToken } = await response.json();
-      localStorage.setItem("token", accessToken);
-      navigate("/");
-    }
-  };
+  const { register } = useAuth();
 
   return (
     <Center h="100vh">
@@ -37,9 +28,9 @@ const RegisterPage = () => {
           <Field.Label>Email</Field.Label>
           <Input
             placeholder="Enter your email"
+            type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            type="email"
           />
           <Field.HelperText>We'll never share your email</Field.HelperText>
         </Field.Root>
@@ -52,9 +43,22 @@ const RegisterPage = () => {
           />
           <Field.HelperText>Must be at least 8 characters</Field.HelperText>
         </Field.Root>
-        <Button w="100%" onClick={handleSubmit}>
+        <Button
+          w="100%"
+          onClick={() => {
+            register(email, password).then(() => {
+              navigate("/");
+            });
+          }}
+        >
           Register
         </Button>
+        <Text color="fg.muted" fontSize="sm" textAlign="center">
+          Already have an account?{" "}
+          <Link asChild color="fg" variant="underline">
+            <RouterLink to="/login">Login</RouterLink>
+          </Link>
+        </Text>
       </VStack>
     </Center>
   );

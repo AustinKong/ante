@@ -11,7 +11,7 @@ import {
   Portal,
   createListCollection,
 } from "@chakra-ui/react";
-import { authFetch } from "@/utils/authFetch";
+import { useAuth } from "@/hooks/useAuth";
 
 const GAME_MODES = createListCollection({
   items: [
@@ -25,6 +25,7 @@ const CreateRoomPage = () => {
   const [maxPlayers, setMaxPlayers] = useState<string>("2");
   const [gameMode, setGameMode] = useState<string>("poker");
   const navigate = useNavigate();
+  const { authFetch } = useAuth();
 
   const handleSubmit = async () => {
     const response = await authFetch("/api/game/", {
@@ -39,8 +40,6 @@ const CreateRoomPage = () => {
       const { roomCode, roomToken } = await response.json();
       localStorage.setItem("roomToken", roomToken);
       navigate(`/game/${roomCode}`);
-    } else {
-      navigate("/login");
     }
   };
 

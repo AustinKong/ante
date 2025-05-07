@@ -7,8 +7,9 @@ import {
   Link,
   Heading,
 } from "@chakra-ui/react";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import FiniteCarousel from "@/components/custom/FiniteCarousel";
+import { useAuth } from "@/hooks/useAuth";
 
 const CAROUSEL_CONTENTS = [
   {
@@ -32,6 +33,9 @@ const CAROUSEL_CONTENTS = [
 ];
 
 const HomePage = () => {
+  const { checkAuth } = useAuth();
+  const navigate = useNavigate();
+
   return (
     <VStack gap="4" h="100vh" p="4" w="full">
       <Box flex="1" w="full">
@@ -52,7 +56,15 @@ const HomePage = () => {
         <Button asChild size="lg" w="full">
           <RouterLink to="/joinRoom">Join a game</RouterLink>
         </Button>
-        <Button asChild size="lg" w="full">
+        <Button
+          size="lg"
+          w="full"
+          onClick={async () => {
+            const isAuthenticated = await checkAuth();
+            if (isAuthenticated) navigate("/createRoom");
+            else navigate("/login");
+          }}
+        >
           <RouterLink to="/createRoom">Host a game</RouterLink>
         </Button>
       </VStack>
