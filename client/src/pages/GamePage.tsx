@@ -105,6 +105,9 @@ const GamePage = () => {
         <TurnCarousel
           players={players.map((player) => ({
             username: player.id === playerState.id ? "You" : player.username,
+            avatar: `/avatars/avatar${player.avatar
+              .toString()
+              .padStart(2, "0")}.png`,
             chips: player.chips,
             statusText:
               player.id === players[turnIndex].id

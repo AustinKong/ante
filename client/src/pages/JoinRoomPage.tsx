@@ -14,18 +14,15 @@ const JoinGamePage = () => {
   const [roomCode, setRoomCode] = useState("");
 
   const handleSubmit = async () => {
-    const response = await fetch("/api/game/join", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ roomCode }),
-    });
+    const response = await fetch(`/api/game/${roomCode}/validate`);
 
     if (response.ok) {
-      const { roomToken } = await response.json();
-      localStorage.setItem("roomToken", roomToken);
-      navigate(`/game/${roomCode}`);
+      const { roomCode, player, roomToken } = await response.json();
+      sessionStorage.setItem("username", player.username);
+      localStorage.setItem("roomToken", roomToken); // Store in localStorage to enable rejoining
+      navigate(`/game/${roomCode}/playerCustomization`);
+    } else {
+      setRoomCode("");
     }
   };
 

@@ -43,11 +43,11 @@ export function createSocket(httpServer: HttpServer) {
       });
 
       socket.on("disconnect", () => {
-        room.leave(playerId);
         socket.broadcast.to(roomCode).emit("playerLeft", {
           player: room.getPlayer(playerId),
           gameState: room.serialize(),
         });
+        room.leave(playerId);
       });
 
       socket.on("playerAction", ({ action }) => {

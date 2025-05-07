@@ -124,9 +124,7 @@ export class PokerRoom extends Room {
       turnIndex: this.turnIndex,
       currentBet: this.currentBet,
       players: this.currentPlayers.map((player) => ({
-        id: player.id,
-        username: player.username,
-        isHost: player.isHost,
+        ...player.serialize(),
         chips: this.playerStates.get(player.id)?.chips || 0,
         lastBet: this.playerStates.get(player.id)?.lastBet || 0,
         hasFolded: this.playerStates.get(player.id)?.hasFolded || false,

@@ -1,6 +1,8 @@
 import { Player } from "../players/Player";
 import { RoomPublicState } from "../types/rooms.types";
 
+const TIMEOUT_INTERVAL = 60000;
+
 export abstract class Room {
   roomCode: string;
   createdAt: number = Date.now();
@@ -22,13 +24,20 @@ export abstract class Room {
 
   reserve(player: Player): void {
     if (this.isFull()) throw new Error("Room is full");
+    if (
+      this.currentPlayers.some((p) => p.username === player.username) ||
+      Array.from(this.pendingPlayers.values()).some(
+        (p) => p.player.username === player.username
+      )
+    )
+      throw new Error("Player username must be unique");
 
     this.pendingPlayers.set(player.id, {
       player,
       timeout: setTimeout(() => {
         this.pendingPlayers.delete(player.id);
         console.log(`Player ${player.id} timed out`);
-      }, 30000), // Connection timeout
+      }, TIMEOUT_INTERVAL), // Connection timeout
     });
   }
 
@@ -56,7 +65,26 @@ export abstract class Room {
   }
 
   getPlayer(playerId: string): Player | undefined {
-    return this.currentPlayers.find((player) => player.id === playerId);
+    return (
+      this.currentPlayers.find((player) => player.id === playerId) ||
+      this.pendingPlayers.get(playerId)?.player
+    );
+  }
+
+  getNewPlayer(isHost: boolean): Player {
+    const MAX_USERNAME_GENERATION_ATTEMPTS = 100;
+    let attempts = 0;
+
+    do {
+      const player = new Player(isHost);
+      if (!this.currentPlayers.some((p) => p.username === player.username)) {
+        return player;
+      }
+      attempts++;
+      if (attempts >= MAX_USERNAME_GENERATION_ATTEMPTS) {
+        throw new Error("Failed to generate a unique username after maximum attempts");
+      }
+    } while (true);
   }
 
   abstract onAction(

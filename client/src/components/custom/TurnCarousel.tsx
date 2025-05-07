@@ -9,6 +9,7 @@ type Player = {
   username: string;
   chips: number;
   statusText: string;
+  avatar: string;
 };
 
 const TurnCarousel = ({
@@ -70,7 +71,7 @@ const PlayerCard = ({
         {player.username}
       </Heading>
       <Avatar.Root size="sm">
-        <Avatar.Image src="https://bit.ly/broken-link" />
+        <Avatar.Image src={player.avatar} />
         <Avatar.Fallback>{player.username[0].toUpperCase()}</Avatar.Fallback>
       </Avatar.Root>
       <Text color="fg.subtle" fontSize="sm">

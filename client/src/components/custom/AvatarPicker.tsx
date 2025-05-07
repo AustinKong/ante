@@ -11,7 +11,13 @@ const AvatarVariants = {
   exit: (direction: number) => ({ opacity: 0, x: direction > 0 ? -80 : 80 }),
 };
 
-const AvatarPicker = ({ avatars }: { avatars: string[] }) => {
+const AvatarPicker = ({
+  avatars,
+  onChange,
+}: {
+  avatars: string[];
+  onChange: (index: number) => void;
+}) => {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -19,13 +25,17 @@ const AvatarPicker = ({ avatars }: { avatars: string[] }) => {
   const handlePrev = () => {
     if (isAnimating) return;
     setDirection(-1);
-    setIndex((prev) => (prev - 1 + avatars.length) % avatars.length);
+    const newIndex = (index - 1 + avatars.length) % avatars.length;
+    onChange(newIndex);
+    setIndex(newIndex);
   };
 
   const handleNext = () => {
     if (isAnimating) return;
     setDirection(1);
-    setIndex((prev) => (prev + 1) % avatars.length);
+    const newIndex = (index + 1) % avatars.length;
+    onChange(newIndex);
+    setIndex(newIndex);
   };
 
   return (
