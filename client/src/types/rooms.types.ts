@@ -1,13 +1,16 @@
 export type RoomType = "poker" | "blackjack";
 
+export type Player = {
+  id: string;
+  username: string;
+  isHost: boolean;
+  avatar: number;
+};
+
 export interface RoomPublicState {
   roomCode: string;
   roomType: RoomType;
-  players: {
-    id: string;
-    username: string;
-    isHost: boolean;
-  }[];
+  players: Player[];
 }
 
 export interface PokerRoomPublicState extends RoomPublicState {
@@ -15,21 +18,15 @@ export interface PokerRoomPublicState extends RoomPublicState {
   dealerIndex: number;
   turnIndex: number;
   currentBet: number;
-  players: {
-    id: string;
-    username: string;
-    isHost: boolean;
+  players: (Player & {
     chips: number;
     lastBet: number;
     hasFolded: boolean;
-  }[];
+  })[];
 }
 
 export interface BlackjackRoomPublicState extends RoomPublicState {
-  players: {
-    id: string;
-    username: string;
-    isHost: boolean;
+  players: (Player & {
     chips: number;
-  }[];
+  })[];
 }

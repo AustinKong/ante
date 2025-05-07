@@ -4,21 +4,25 @@ export class Player {
   id: string;
   username: string;
   isHost: boolean;
+  avatar: number;
 
   constructor(isHost = false, username?: string) {
     this.id = uuidv4();
     this.username = username || generateUsername();
     this.isHost = isHost;
+    this.avatar = 0;
   }
 
   updateInfo(username: string, avatar: number) {
     this.username = username;
+    this.avatar = avatar;
   }
 
   serialize() {
     return {
       id: this.id,
       username: this.username,
+      avatar: this.avatar,
       isHost: this.isHost,
     };
   }

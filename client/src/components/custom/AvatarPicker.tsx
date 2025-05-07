@@ -25,15 +25,17 @@ const AvatarPicker = ({
   const handlePrev = () => {
     if (isAnimating) return;
     setDirection(-1);
-    onChange(index);
-    setIndex((prev) => (prev - 1 + avatars.length) % avatars.length);
+    const newIndex = (index - 1 + avatars.length) % avatars.length;
+    onChange(newIndex);
+    setIndex(newIndex);
   };
 
   const handleNext = () => {
     if (isAnimating) return;
     setDirection(1);
-    onChange(index);
-    setIndex((prev) => (prev + 1) % avatars.length);
+    const newIndex = (index + 1) % avatars.length;
+    onChange(newIndex);
+    setIndex(newIndex);
   };
 
   return (

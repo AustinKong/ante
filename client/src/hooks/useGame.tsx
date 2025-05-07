@@ -2,14 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import io, { Socket } from "socket.io-client";
 import {
   PokerRoomPublicState,
+  Player,
   // BlackjackRoomPublicState,
 } from "@/types/rooms.types";
-
-interface Player {
-  id: string;
-  username: string;
-  isHost: boolean;
-}
 
 type RoomPublicState = PokerRoomPublicState;
 

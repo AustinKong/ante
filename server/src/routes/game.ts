@@ -87,7 +87,6 @@ gameRouter.post("/:roomCode/join", (req, res) => {
   res.sendStatus(201);
 });
 
-// Preflight endpoint to check if room is available and generate unique username
 gameRouter.get("/:roomCode/validate", (req, res) => {
   const { roomCode } = req.params;
   const room = getRoom(roomCode);
