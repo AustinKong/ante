@@ -72,10 +72,17 @@ export abstract class Room {
   }
 
   getNewPlayer(isHost: boolean): Player {
+    const MAX_USERNAME_GENERATION_ATTEMPTS = 100;
+    let attempts = 0;
+
     do {
       const player = new Player(isHost);
       if (!this.currentPlayers.some((p) => p.username === player.username)) {
         return player;
+      }
+      attempts++;
+      if (attempts >= MAX_USERNAME_GENERATION_ATTEMPTS) {
+        throw new Error("Failed to generate a unique username after maximum attempts");
       }
     } while (true);
   }
